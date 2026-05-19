@@ -1,5 +1,10 @@
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
+
+phone_validator = RegexValidator(
+    regex=r'^\+?1?\d{9,15}$',
+    message="Numer telefonu musi być wpisany w formacie: '+999999999'. Od 9 do 15 cyfr."
+)
 
 class Service(models.Model):
     name = models.CharField(max_length=100, verbose_name="Service name")
@@ -27,7 +32,12 @@ class Barber(models.Model):
 
 class Customer(models.Model):
     fullname = models.CharField(max_length=150, verbose_name="Full name")
-    phone = models.CharField(max_length=20, unique=True, verbose_name="Phone")
+    phone = models.CharField(
+        max_length=20, 
+        unique=True, 
+        validators=[phone_validator], 
+        verbose_name="Phone"
+    )
     email = models.EmailField(blank=True, null=True, verbose_name="Email")
 
     def __str__(self):
@@ -53,9 +63,14 @@ class Appointment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата створення запису")
 
     class Meta:
-        # Захист від дублювання: один барбер не може бути зайнятий двома людьми на один і той самий час
-        unique_together = ('barber', 'date', 'time')
         ordering = ['-date', '-time']
+        
+        constraints = [
+            models.UniqueConstraint(
+                fields=['barber', 'date', 'time'], 
+                name='unique_barber_appointment_slot'
+            )
+        ]
 
     def __str__(self):
         return f"Запис №{self.id}: {self.customer.fullname} -> {self.barber.name} ({self.date} {self.time})"

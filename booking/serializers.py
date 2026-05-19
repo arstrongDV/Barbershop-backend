@@ -1,6 +1,12 @@
 from rest_framework import serializers
 from django.utils import timezone
+from django.core.validators import RegexValidator
 from .models import Barber, Service, Appointment, Customer
+
+phone_regex = RegexValidator(
+    regex=r'^\+?1?\d{9,15}$',
+    message="Numer telefonu musi być wpisany w formacie: '+999999999'. Od 9 do 15 cyfr."
+)
 
 class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,7 +22,7 @@ class BarberSerializer(serializers.ModelSerializer):
 
 class AppointmentCreateSerializer(serializers.ModelSerializer):
     customer_fullname = serializers.CharField(write_only=True)
-    customer_phone = serializers.CharField(write_only=True)
+    customer_phone = serializers.CharField(write_only=True, validators=[phone_regex])
     customer_email = serializers.EmailField(write_only=True, required=True)
 
     class Meta:
@@ -26,11 +32,22 @@ class AppointmentCreateSerializer(serializers.ModelSerializer):
             'customer_fullname', 'customer_phone', 'customer_email'
         ]
 
+    def validate_customer_fullname(self, value):
+        clean_name = value.strip()
+        
+        if len(clean_name) < 2:
+            raise serializers.ValidationError("Imię i nazwisko muszą mieć co najmniej 2 znaki!")
+        
+        if clean_name.isdigit():
+            raise serializers.ValidationError("Imię i nazwisko nie mogą składać się tylko z cyfr!")
+            
+        return clean_name
+
     def validate_date(self, value):
         today = timezone.localdate()
         
         if value < today:
-            raise serializers.ValidationError("You cannot book an appointment for a past date!")
+            raise serializers.ValidationError("Nie można zarezerwować wizyty w przeszłości!")
 
         return value
 
