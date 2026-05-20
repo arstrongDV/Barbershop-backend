@@ -50,6 +50,23 @@ class AppointmentCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Nie można zarezerwować wizyty w przeszłości!")
 
         return value
+    
+    def validate(self, attrs):
+        barber = attrs.get('barber')
+        date = attrs.get('date')
+        time = attrs.get('time')
+
+        exists = Appointment.objects.filter(
+            barber=barber,
+            date=date,
+            time=time,
+        ).exclude(status='cancelled').exists()
+
+        if exists:
+            raise serializers.ValidationError({
+                "error": "Ten termin jest już zarezerwowany u wybranego barbera!"
+            })
+        return attrs
 
     def create(self, validated_data):
         fullname = validated_data.pop('customer_fullname')

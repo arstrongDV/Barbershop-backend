@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator, RegexValidator
+from django.db.models import Q
 
 phone_validator = RegexValidator(
     regex=r'^\+?1?\d{9,15}$',
@@ -67,11 +68,11 @@ class Appointment(models.Model):
         
         constraints = [
             models.UniqueConstraint(
-                fields=['barber', 'date', 'time'], 
-                name='unique_barber_appointment_slot'
+                fields=['barber', 'date', 'time'],
+                condition=~Q(status='cancelled'), 
+                name='unique_active_barber_appointment_slot'
             )
         ]
 
     def __str__(self):
         return f"Запис №{self.id}: {self.customer.fullname} -> {self.barber.name} ({self.date} {self.time})"
-
