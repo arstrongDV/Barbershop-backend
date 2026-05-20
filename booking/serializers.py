@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.utils import timezone
 from django.core.validators import RegexValidator
 from .models import Barber, Service, Appointment, Customer
+from .utils import send_telegram_notification
 
 phone_regex = RegexValidator(
     regex=r'^\+?1?\d{9,15}$',
@@ -28,7 +29,7 @@ class AppointmentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
         fields = [
-            'id', 'barber', 'service', 'date', 'time', 'comment',
+            'id', 'barber', 'services', 'date', 'time', 'comment',
             'customer_fullname', 'customer_phone', 'customer_email'
         ]
 
@@ -73,10 +74,19 @@ class AppointmentCreateSerializer(serializers.ModelSerializer):
         phone = validated_data.pop('customer_phone')
         email = validated_data.pop('customer_email')
 
+        services_data = validated_data.pop('services', [])
+
         customer, created = Customer.objects.get_or_create(
             phone=phone,
             defaults={'fullname': fullname, 'email': email}
         )
 
         appointment = Appointment.objects.create(customer=customer, **validated_data)
+
+        appointment.services.set(services_data)
+
+        fresh_appointment = Appointment.objects.prefetch_related('services').get(id=appointment.id)
+        
+        send_telegram_notification(fresh_appointment)
+
         return appointment

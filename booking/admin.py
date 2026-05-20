@@ -21,5 +21,11 @@ class CustomerAdmin(admin.ModelAdmin):
 
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'customer', 'barber', 'service', 'date', 'time', 'status')
+    list_display = ('id', 'customer', 'barber', 'display_services', 'date', 'time', 'status')
     list_filter = ('status', 'date', 'barber')
+
+    def display_services(self, obj):
+        return ", ".join([service.name for service in obj.services.all()])
+    
+    # Заголовок стовпчика в адмінці
+    display_services.short_description = 'Selected Services'

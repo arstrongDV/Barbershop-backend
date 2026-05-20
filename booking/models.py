@@ -53,7 +53,7 @@ class Appointment(models.Model):
 
     barber = models.ForeignKey(Barber, on_delete=models.CASCADE, related_name='appointments', verbose_name="Barber")
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='appointments', verbose_name="Customer")
-    service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='appointments', verbose_name="Selected service")
+    services = models.ManyToManyField(Service, related_name='appointments', verbose_name="Selected services")
 
     date = models.DateField(verbose_name="Date")
     time = models.TimeField(verbose_name="Time")

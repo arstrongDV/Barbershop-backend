@@ -29,7 +29,8 @@ ALLOWED_HOSTS = [
     "http://localhost:3000",
     "https://tytanowyt4mpon.github.io",
     '127.0.0.1', 
-    'localhost'
+    'localhost',
+    'flounder-overbill-procedure.ngrok-free.dev'
 ]
 
 
@@ -65,6 +66,9 @@ SPECTACULAR_SETTINGS = {
         'language': 'pl',
     },
 }
+
+TELEGRAM_BOT_TOKEN = '8347110961:AAF_r8pbGtFJMbVIctWsK4ojMAhGBxHlI9Q'
+TELEGRAM_ADMIN_CHAT_ID = '1985703972'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
