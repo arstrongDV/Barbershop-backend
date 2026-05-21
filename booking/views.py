@@ -15,6 +15,12 @@ from rest_framework.views import APIView
 from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from rest_framework.pagination import PageNumberPagination
+
+class BarbersCardPagination(PageNumberPagination):
+    page_size = 6
+    page_size_query_param = 'limit'
+    max_page_size = 50
 
 class ServiceViewSet(viewsets.ReadOnlyModelViewSet):
     """Endpoint do przeglądania listy usług barbershopu"""
@@ -23,7 +29,8 @@ class ServiceViewSet(viewsets.ReadOnlyModelViewSet):
 
 class BarberViewSet(viewsets.ReadOnlyModelViewSet):
     """Endpoint do przeglądania listy barberów oraz ich indywidualnych usług."""
-    queryset = Barber.objects.all()
+    queryset = Barber.objects.all().order_by('id')
+    pagination_class = BarbersCardPagination
     serializer_class = BarberSerializer
 
     @extend_schema(
