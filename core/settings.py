@@ -10,26 +10,39 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+load_dotenv(os.path.join(BASE_DIR, '.env'))
+
+# Читаємо SECRET_KEY. Якщо його немає в .env, використовуємо дефолтний (безпечний фолбек)
+SECRET_KEY = os.getenv(
+    'SECRET_KEY', 
+    'django-insecure-%ye*audy(sfe3a9%b01#tgf+4kc%%2#jfc8lx3v^u3v&7-)5n_'
+)
+
+# Читаємо DEBUG (конвертуємо рядок 'True' у булеве значення True)
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
+
+TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+TELEGRAM_ADMIN_CHAT_ID = os.getenv('TELEGRAM_ADMIN_CHAT_ID')
+
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-%ye*audy(sfe3a9%b01#tgf+4kc%%2#jfc8lx3v^u3v&7-)5n_'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
 ALLOWED_HOSTS = [
     "http://localhost:3000",
     "https://tytanowyt4mpon.github.io",
     '127.0.0.1', 
     'localhost',
+    "backend",
     'flounder-overbill-procedure.ngrok-free.dev'
 ]
 
@@ -66,9 +79,6 @@ SPECTACULAR_SETTINGS = {
         'language': 'pl',
     },
 }
-
-TELEGRAM_BOT_TOKEN = '8347110961:AAF_r8pbGtFJMbVIctWsK4ojMAhGBxHlI9Q'
-TELEGRAM_ADMIN_CHAT_ID = '1985703972'
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
